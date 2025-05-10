@@ -1,4 +1,50 @@
+<!DOCTYPE html>
+<html>
 <head>
+  <title>FONS</title>
+  <meta charset="UTF-8">
+</head>
+<body>
+  <pre id="text"></pre>
+
+  <script>
+    // Get URL parameter
+    function getNameFromURL() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('name') || 'Neo';
+    }
+
+    const name = getNameFromURL();
+
+    // Sample text with a placeholder
+    const fullText = `Hello, ${name}!\nWelcome to this simple typing demonstration.\n\nEvery time you refresh the page, you'll see more of this message being typed out.\n\nHope you're having a great day!\n\nSee you again soon.\n`;
+
+    const display = document.getElementById('text');
+    const storageKey = 'typedIndex_' + name;
+    let index = parseInt(localStorage.getItem(storageKey)) || 0;
+
+    function typeNextChar() {
+      if (index < fullText.length) {
+        display.textContent += fullText[index];
+        if (fullText[index] === '\n') {
+          // Longer pause at newlines
+          setTimeout(typeNextChar, 500);
+        } else {
+          setTimeout(typeNextChar, 50);
+        }
+        index++;
+        localStorage.setItem(storageKey, index);
+      }
+    }
+
+    // Initialize text with previously typed characters
+    display.textContent = fullText.slice(0, index);
+    typeNextChar();
+  </script>
+</body>
+</html>
+
+<!--<head>
 <style>
 body { margin: 0; padding: 0; font-family: system-ui, 'sans serif'; background-color: #efe8db; color: #555; }
 h1 { font-size: 6.82rem; max-width: 80ch; margin: 0 auto; margin-top: 1.75em; margin-bottom: 1em; }
@@ -16,4 +62,4 @@ h1 { font-size: 6.82rem; max-width: 80ch; margin: 0 auto; margin-top: 1.75em; ma
       <div class="contact email">Email: <a class="link" href="mailto:jose.smutny@proton.me">jose.smutny@proton.me</a></div>
     </div>
   </div>
-</body>
+</body>--!>
