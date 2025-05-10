@@ -1,23 +1,70 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>FONS</title>
   <meta charset="UTF-8">
+  <title>Typing Page</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: black;
+      color: #39ff14;
+      font-family: monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .center-wrapper {
+      position: relative;
+      top: 0%; 
+      transform: translateY(-50%);
+      width: 600px;
+      max-width: 90vw;
+    }
+
+    pre {
+      font-size: 1.25rem;
+      line-height: 1.75;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      word-break: break-all;
+      text-align: left;
+      text-shadow: 0 0 4px #39ff14, 0 0 10px #0f0;
+      margin: 0;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 0.6ch;
+      height: 1em;
+      background-color: #39ff14;
+      margin-left: 2px;
+      animation: blink 1.5s step-start infinite;
+      box-shadow: 0 0 4px #39ff14, 0 0 10px #0f0;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+  </style>
 </head>
 <body>
-  <pre id="text"></pre>
+  <div class="center-wrapper">
+    <pre><span id="text"></span><span class="cursor"></span></pre>
+  </div>
 
   <script>
-    // Get URL parameter
     function getNameFromURL() {
       const params = new URLSearchParams(window.location.search);
-      return params.get('name') || 'Neo';
+      return params.get('name') || 'Friend';
     }
 
     const name = getNameFromURL();
 
-    // Sample text with a placeholder
-    const fullText = `Hello, ${name}!\nWelcome to this simple typing demonstration.\n\nEvery time you refresh the page, you'll see more of this message being typed out.\n\nHope you're having a great day!\n\nSee you again soon.\n`;
+    const fullText = `Ťuk ťuk.\nSi hore?\nPrebuď sa ${name}...\nOhľadne nášho stretnutia na Východe.\nPotreboval by som od teba pár drobností.\n\n1. Tvoju aktuálnu portrétovú fotografiu - vol vohoz klasicky v čiernom (mailto:fons@skauting do 2025-06-22 23:59:59:99 UTC+1 DST).\n2. Ber brejle - v NEklasickom štýle (s UV-filtrom, polarizované, odtieň všetko nechávam na tebe).\n\nKontakt sa uskutoční na 2025-08-13 16:30:00:00 UTC+1 DST, v chrámovom komplexe 49.0010725N, 20.7521103E\nPríď včas. Vieš, že na nikoho nečakám.\n\nFoundation of New Simulations [FONS] ... ťa má`;
 
     const display = document.getElementById('text');
     const storageKey = 'typedIndex_' + name;
@@ -26,40 +73,24 @@
     function typeNextChar() {
       if (index < fullText.length) {
         display.textContent += fullText[index];
+
+        let delay = 120;
         if (fullText[index] === '\n') {
-          // Longer pause at newlines
-          setTimeout(typeNextChar, 500);
-        } else {
-          setTimeout(typeNextChar, 50);
+          delay = 1200;
+        } else if (fullText[index] === '.') {
+          delay = 900;
+        } else if (fullText[index] === ',' || fullText[index] === "!") {
+          delay = 500;
         }
+
         index++;
         localStorage.setItem(storageKey, index);
+        setTimeout(typeNextChar, delay);
       }
     }
 
-    // Initialize text with previously typed characters
     display.textContent = fullText.slice(0, index);
     typeNextChar();
   </script>
 </body>
 </html>
-
-<!--<head>
-<style>
-body { margin: 0; padding: 0; font-family: system-ui, 'sans serif'; background-color: #efe8db; color: #555; }
-h1 { font-size: 6.82rem; max-width: 80ch; margin: 0 auto; margin-top: 1.75em; margin-bottom: 1em; }
-.content { font-size: 1.2rem; max-width: 80ch; margin: 0 auto; }
-.contacts { font-size: 2rem; line-height: 2em; }
-.contacts .link { line-height: inherit; color:#4187df; }
-</style>
-<title>José Smutný</title>
-</head>
-<body>
-  <div class="content">
-    <h1>José Smutný</h1>
-    <div class="contacts">
-      <div class="contact phone">Telefon: <a class="link" href="tel:+420608247921">608 247 921</a></div>
-      <div class="contact email">Email: <a class="link" href="mailto:jose.smutny@proton.me">jose.smutny@proton.me</a></div>
-    </div>
-  </div>
-</body>--!>
