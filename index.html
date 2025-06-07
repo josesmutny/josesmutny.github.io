@@ -6,19 +6,27 @@
   <style>
     body {
       margin: 0;
-      padding: 2rem 1rem;
+      padding: 0;
       background-color: black;
       color: #39ff14;
       font-family: monospace;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .scroll-container {
+      height: 100vh;
+      overflow-y: auto;
       display: flex;
       justify-content: center;
-      background-attachment: fixed;
-      min-height: 100vh;
+      padding: 2rem 1rem;
+      box-sizing: border-box;
     }
 
     .center-wrapper {
       width: 600px;
       max-width: 90vw;
+      padding-bottom: 100px; /* ensures text never reaches bottom */
     }
 
     pre {
@@ -48,8 +56,10 @@
   </style>
 </head>
 <body>
-  <div class="center-wrapper">
-    <pre><span id="text"></span><span class="cursor"></span></pre>
+  <div class="scroll-container" id="scrollContainer">
+    <div class="center-wrapper">
+      <pre><span id="text"></span><span class="cursor"></span></pre>
+    </div>
   </div>
 
   <script>
@@ -63,8 +73,13 @@
     const fullText = `Ťuk ťuk.\nSi hore?\nPrebuď sa ${name}...\nOhľadne nášho stretnutia na Východe.\nPotreboval by som od teba pár drobností.\n\n1. Tvoju aktuálnu portrétovú fotografiu - vol vohoz klasicky v čiernom (mailto:fons@skauting.sk do 2025-06-22 23:59:59:99 UTC+1 DST).\n2. Ber brejle - v NEklasickom štýle (s UV-filtrom, polarizované, odtieň všetko nechávam na tebe).\n\nKontakt sa uskutoční na 2025-08-13 16:30:00:00 UTC+1 DST, v chrámovom komplexe 49.0010725N, 20.7521103E\nPríď včas. Vieš, že na nikoho nečakám.\n\nFoundation of New Simulations [FONS] ... ťa má`;
 
     const display = document.getElementById('text');
+    const scrollContainer = document.getElementById('scrollContainer');
     const storageKey = 'typedIndex_' + name;
     let index = parseInt(localStorage.getItem(storageKey)) || 0;
+
+    function scrollToBottom() {
+      scrollContainer.scrollTop = scrollContainer.scrollHeight;
+    }
 
     function typeNextChar() {
       if (index < fullText.length) {
@@ -81,11 +96,13 @@
 
         index++;
         localStorage.setItem(storageKey, index);
+        scrollToBottom();
         setTimeout(typeNextChar, delay);
       }
     }
 
     display.textContent = fullText.slice(0, index);
+    scrollToBottom();
     typeNextChar();
   </script>
 </body>
