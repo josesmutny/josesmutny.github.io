@@ -4,13 +4,13 @@
   <meta charset="UTF-8">
   <title>FONS</title>
   <style>
-    body {
+    html, body {
       margin: 0;
       padding: 0;
       background-color: black;
       color: #39ff14;
       font-family: monospace;
-      height: 100vh;
+      height: 100%;
       overflow: hidden;
     }
 
@@ -19,14 +19,14 @@
       overflow-y: auto;
       display: flex;
       justify-content: center;
-      padding: 2rem 1rem;
       box-sizing: border-box;
+      padding: 2rem 1rem;
     }
 
     .center-wrapper {
       width: 600px;
       max-width: 90vw;
-      padding-bottom: 100px; /* ensures text never reaches bottom */
+      padding-bottom: 100px;
     }
 
     pre {
@@ -58,7 +58,7 @@
 <body>
   <div class="scroll-container" id="scrollContainer">
     <div class="center-wrapper">
-      <pre><span id="text"></span><span class="cursor"></span></pre>
+      <pre><span id="text"></span><span class="cursor" id="cursor"></span></pre>
     </div>
   </div>
 
@@ -74,11 +74,22 @@
 
     const display = document.getElementById('text');
     const scrollContainer = document.getElementById('scrollContainer');
+    const cursor = document.getElementById('cursor');
     const storageKey = 'typedIndex_' + name;
     let index = parseInt(localStorage.getItem(storageKey)) || 0;
 
-    function scrollToBottom() {
-      scrollContainer.scrollTop = scrollContainer.scrollHeight;
+    function scrollToCursorOffset() {
+      const cursorRect = cursor.getBoundingClientRect();
+      const containerRect = scrollContainer.getBoundingClientRect();
+
+      // Target vertical position (e.g. 40% down from top of screen)
+      const targetY = containerRect.top + containerRect.height * 0.4;
+
+      // Current scroll amount + offset needed to place cursor line at targetY
+      const scrollTop = scrollContainer.scrollTop;
+      const offset = cursorRect.top - targetY;
+
+      scrollContainer.scrollTop = scrollTop + offset;
     }
 
     function typeNextChar() {
@@ -96,13 +107,14 @@
 
         index++;
         localStorage.setItem(storageKey, index);
-        scrollToBottom();
+
+        scrollToCursorOffset();
         setTimeout(typeNextChar, delay);
       }
     }
 
     display.textContent = fullText.slice(0, index);
-    scrollToBottom();
+    scrollToCursorOffset();
     typeNextChar();
   </script>
 </body>
