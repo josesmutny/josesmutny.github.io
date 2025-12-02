@@ -1,121 +1,288 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>FONS</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      background-color: black;
-      color: #39ff14;
-      font-family: monospace;
-      height: 100%;
-      overflow: hidden;
-    }
-
-    .scroll-container {
-      height: 100vh;
-      overflow-y: auto;
-      display: flex;
-      justify-content: center;
-      box-sizing: border-box;
-      padding: 2rem 1rem;
-    }
-
-    .center-wrapper {
-      width: 600px;
-      max-width: 90vw;
-      padding-bottom: 100px;
-    }
-
-    pre {
-      font-size: 1.25rem;
-      line-height: 1.75;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      word-break: break-all;
-      text-align: left;
-      text-shadow: 0 0 4px #39ff14, 0 0 10px #0f0;
-      margin: 0;
-    }
-
-    .cursor {
-      display: inline-block;
-      width: 0.6ch;
-      height: 1em;
-      background-color: #39ff14;
-      margin-left: 2px;
-      animation: blink 1.5s step-start infinite;
-      box-shadow: 0 0 4px #39ff14, 0 0 10px #0f0;
-    }
-
-    @keyframes blink {
-      50% { opacity: 0; }
-    }
-  </style>
-</head>
-<body>
-  <div class="scroll-container" id="scrollContainer">
-    <div class="center-wrapper">
-      <pre><span id="text"></span><span class="cursor" id="cursor"></span></pre>
-    </div>
-  </div>
-
-  <script>
-    function getNameFromURL() {
-      const params = new URLSearchParams(window.location.search);
-      return params.get('name') || 'Friend';
-    }
-
-    const name = getNameFromURL();
-
-    const fullText = `Ťuk ťuk.\nSi hore?\nPrebuď sa ${name}...\nOhľadne nášho stretnutia na Východe.\nPotreboval by som od teba pár drobností.\n\n1. Tvoju aktuálnu portrétovú fotografiu - vol vohoz klasicky v čiernom (mailto:fons@skauting.sk do 2025-06-22 23:59:59:99 UTC+1 DST).\n2. Ber brejle - v NEklasickom štýle (s UV-filtrom, polarizované, odtieň všetko nechávam na tebe).\n\nKontakt sa uskutoční na 2025-08-13 16:30:00:00 UTC+1 DST, v chrámovom komplexe 49.0010725N, 20.7521103E\nPríď včas. Vieš, že na nikoho nečakám.\n\nFoundation of New Simulations [FONS] ... ťa má`;
-
-    const display = document.getElementById('text');
-    const scrollContainer = document.getElementById('scrollContainer');
-    const cursor = document.getElementById('cursor');
-    const storageKey = 'typedIndex_' + name;
-    let index = parseInt(localStorage.getItem(storageKey)) || 0;
-
-    function scrollToCursorOffset() {
-      const cursorRect = cursor.getBoundingClientRect();
-      const containerRect = scrollContainer.getBoundingClientRect();
-
-      // Target vertical position (e.g. 40% down from top of screen)
-      const targetY = containerRect.top + containerRect.height * 0.4;
-
-      // Current scroll amount + offset needed to place cursor line at targetY
-      const scrollTop = scrollContainer.scrollTop;
-      const offset = cursorRect.top - targetY;
-
-      scrollContainer.scrollTop = scrollTop + offset;
-    }
-
-    function typeNextChar() {
-      if (index < fullText.length) {
-        display.textContent += fullText[index];
-
-        let delay = 120;
-        if (fullText[index] === '\n') {
-          delay = 1200;
-        } else if (fullText[index] === '.') {
-          delay = 900;
-        } else if (fullText[index] === ',' || fullText[index] === "!") {
-          delay = 500;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draggable List</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
         }
 
-        index++;
-        localStorage.setItem(storageKey, index);
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
 
-        scrollToCursorOffset();
-        setTimeout(typeNextChar, delay);
-      }
-    }
+        button {
+            padding: 10px 15px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            transition: background-color 0.2s;
+        }
 
-    display.textContent = fullText.slice(0, index);
-    scrollToCursorOffset();
-    typeNextChar();
-  </script>
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #draggable-list {
+            list-style: none;
+            padding: 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: white;
+        }
+
+        .list-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            cursor: grab;
+            background-color: #ffffff;
+            transition: transform 0.3s, opacity 0.3s, background-color 0.2s;
+            position: relative;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-item:active {
+            cursor: grabbing;
+        }
+
+        .list-item.dragging {
+            opacity: 0.5;
+            background-color: #e0f7fa; /* Slightly highlight the dragging item */
+        }
+
+        .drop-placeholder {
+            height: 50px; /* Same height as list-item */
+            background-color: #add8e6; /* Light blue */
+            border: 2px dashed #007bff;
+            margin: 5px 0;
+            opacity: 0;
+            transition: opacity 0.2s, height 0.3s;
+        }
+
+        .drop-placeholder.visible {
+            opacity: 1;
+            /* Height is already set, transition works when added/removed */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <button id="copy-button">Copy Ordered List</button>
+        <button id="reset-button">Reset Order</button>
+    </div>
+
+    <ul id="draggable-list">
+        </ul>
+
+    <script>
+        const initialEntries = [
+          [
+    { "id": 1, "value": "Cerny pasazer" },
+    { "id": 2, "value": "Mela jsem ja pejska" },
+    { "id": 3, "value": "Lasko (kryl)" },
+    { "id": 4, "value": "Ved me dal..." },
+    { "id": 5, "value": "Podvod" },
+    { "id": 6, "value": "Prazskej demon" },
+    { "id": 7, "value": "Zkouška dospělosti" },
+    { "id": 8, "value": "Tri cunatka" },
+    { "id": 9, "value": "Jacek" },
+    { "id": 10, "value": "Zahrada ticha" },
+    { "id": 11, "value": "Medvědi nevědí" },
+    { "id": 12, "value": "Buraky" },
+    { "id": 13, "value": "Panenka (poutníci)" },
+    { "id": 14, "value": "Citronky" },
+    { "id": 15, "value": "Pověste ho vejš" },
+    { "id": 16, "value": "Ja, pisnicka" },
+    { "id": 17, "value": "Povidej" },
+    { "id": 18, "value": "Tu kytaru jsem koupil kvuli tobe" },
+    { "id": 19, "value": "Růže z Texasu" },
+    { "id": 20, "value": "Dezolat" },
+    { "id": 21, "value": "Válečná" },
+    { "id": 22, "value": "Vecernicek" },
+    { "id": 23, "value": "Hudsonské šífy" },
+    { "id": 24, "value": "Stanky" },
+    { "id": 25, "value": "Píseň zhrzeného trampa" },
+    { "id": 26, "value": "Srouby a matice" },
+    { "id": 27, "value": "Z Petěrburg" },
+    { "id": 28, "value": "Zabili, zabili" },
+    { "id": 29, "value": "Hlupaku najdu te" },
+    { "id": 30, "value": "Aux champs elysées" },
+    { "id": 31, "value": "Cesta?" },
+    { "id": 32, "value": "Hruška" },
+    { "id": 33, "value": "Vysoký jalovec" },
+    { "id": 34, "value": "Sova sněžná" },
+    { "id": 35, "value": "to ta helpa" },
+    { "id": 36, "value": "veličenstvo kat" },
+    { "id": 37, "value": "lojza a líza" },
+    { "id": 38, "value": "Bratříčku zavírej vrátka?" },
+    { "id": 39, "value": "Riptide" },
+    { "id": 40, "value": "Where is my mind" }
+]
+        ];
+
+        let currentEntries = [...initialEntries];
+        const list = document.getElementById('draggable-list');
+        const copyButton = document.getElementById('copy-button');
+        const resetButton = document.getElementById('reset-button');
+        let draggedItem = null;
+        let placeholder = null;
+
+        function renderList() {
+            list.innerHTML = '';
+            currentEntries.forEach(entry => {
+                const item = document.createElement('li');
+                item.className = 'list-item';
+                item.draggable = true;
+                item.dataset.id = entry.id;
+                item.textContent = entry.value;
+
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragend', handleDragEnd);
+                list.appendChild(item);
+            });
+        }
+
+        function createPlaceholder() {
+            if (!placeholder) {
+                placeholder = document.createElement('div');
+                placeholder.className = 'drop-placeholder';
+            }
+            return placeholder;
+        }
+
+        function handleDragStart(e) {
+            draggedItem = this;
+            setTimeout(() => {
+                this.classList.add('dragging');
+            }, 0); // Delay to allow the item to be "picked up" before changing its style
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            draggedItem = null;
+            if (placeholder && placeholder.parentElement) {
+                placeholder.remove();
+            }
+            updateListOrder();
+        }
+
+        function updateListOrder() {
+            const items = Array.from(list.querySelectorAll('.list-item'));
+            currentEntries = items.map(item => {
+                const id = parseInt(item.dataset.id);
+                return initialEntries.find(entry => entry.id === id);
+            }).filter(entry => entry !== undefined); // Rebuild currentEntries based on DOM order
+            console.log('New Order:', currentEntries.map(e => e.value));
+        }
+
+        list.addEventListener('dragover', (e) => {
+            e.preventDefault(); // Necessary to allow dropping
+            if (!draggedItem) return;
+
+            const afterElement = getDragAfterElement(list, e.clientY);
+            const currentPlaceholder = createPlaceholder();
+
+            // Insert placeholder
+            if (afterElement == null) {
+                // If dragging to the end
+                if (list.lastChild !== currentPlaceholder) {
+                    list.appendChild(currentPlaceholder);
+                }
+            } else {
+                // If dragging before another element
+                if (afterElement.previousSibling !== currentPlaceholder) {
+                    list.insertBefore(currentPlaceholder, afterElement);
+                }
+            }
+
+            // Ensure placeholder is visible
+            currentPlaceholder.classList.add('visible');
+            e.dataTransfer.dropEffect = 'move';
+        });
+
+        list.addEventListener('dragleave', (e) => {
+            // Optional: remove placeholder if drag leaves the whole list area
+            // However, keeping it visible until drop or dragend offers better visual guidance
+        });
+
+        list.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (!draggedItem) return;
+
+            // Remove placeholder visibility
+            if (placeholder) {
+                placeholder.classList.remove('visible');
+            }
+
+            // Determine where to drop the dragged item
+            const afterElement = getDragAfterElement(list, e.clientY);
+
+            if (afterElement == null) {
+                list.appendChild(draggedItem);
+            } else {
+                list.insertBefore(draggedItem, afterElement);
+            }
+
+            // Remove the placeholder from the DOM after dropping the item
+            if (placeholder && placeholder.parentElement) {
+                placeholder.remove();
+            }
+
+            // The dragend listener will call updateListOrder
+        });
+
+        function getDragAfterElement(container, y) {
+            const draggableItems = Array.from(container.querySelectorAll('.list-item:not(.dragging)'));
+            
+            // Include placeholder in the calculation if it's visible, to get the correct drop position
+            const items = draggableItems.filter(item => item !== draggedItem);
+
+            return items.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        // --- Button Functions ---
+
+        copyButton.addEventListener('click', () => {
+            const result = currentEntries.map((entry, index) => {
+                return `${entry.value}, ${index + 1}`; // Index is 1-based position
+            }).join('\n');
+
+            navigator.clipboard.writeText(result)
+                .catch(err => {
+                    console.error('Could not copy text: ', err);
+                    alert('Failed to copy to clipboard. Check console for details.');
+                });
+        });
+
+        resetButton.addEventListener('click', () => {
+            currentEntries = [...initialEntries];
+            renderList();
+        });
+
+        // Initial render
+        renderList();
+    </script>
+
 </body>
 </html>
