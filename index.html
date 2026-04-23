@@ -52,24 +52,29 @@ button {
 
     cursor: grab;
     user-select: none;
-    touch-action: none; /* 🔥 klíčové pro mobile */
+    touch-action: none;
 }
 
-.list-item.dragging {
-    opacity: 0.5;
-    background: #e0f7fa;
+.dragging {
+    opacity: 0.4;
+}
+
+.placeholder {
+    height: 28px;
+    margin: 2px 0;
+    border-radius: 4px;
+    background: #cce5ff;
+    break-inside: avoid;
 }
 
 .text {
     pointer-events: none;
 }
 
-/* ⭐ */
 .star {
     color: #ccc;
     cursor: pointer;
     font-size: 14px;
-    flex-shrink: 0;
 }
 
 .star.selected {
@@ -89,7 +94,7 @@ button {
 <ul id="draggable-list"></ul>
 
 <script>
-const initialEntries = [
+const initialEntries = [ /* same list */ 
 { id:1,value:"Lilie"},{ id:2,value:"Peterburg"},{ id:3,value:"Divocí koně"},
 { id:4,value:"Vítr"},{ id:5,value:"Kozel"},{ id:6,value:"Hercegovina"},
 { id:7,value:"Dokud se zpívá"},{ id:8,value:"Ještě jedno kafe"},
@@ -184,7 +189,9 @@ let currentEntries = [...initialEntries];
 let selected = new Set();
 const list = document.getElementById('draggable-list');
 
-let draggedEl = null;
+let dragged = null;
+let placeholder = document.createElement('li');
+placeholder.className = 'placeholder';
 
 function renderList() {
     list.innerHTML = '';
@@ -221,12 +228,13 @@ function renderList() {
 function startDrag(e) {
     if (e.target.classList.contains('star')) return;
 
-    e.preventDefault(); // 🔥 zabraňuje výběru textu
+    e.preventDefault();
 
-    draggedEl = e.currentTarget;
-    draggedEl.classList.add('dragging');
+    dragged = e.currentTarget;
+    dragged.classList.add('dragging');
 
-    draggedEl.setPointerCapture(e.pointerId);
+    placeholder.style.height = dragged.offsetHeight + 'px';
+    dragged.parentNode.insertBefore(placeholder, dragged.nextSibling);
 
     document.addEventListener('pointermove', onMove);
     document.addEventListener('pointerup', endDrag);
@@ -235,27 +243,21 @@ function startDrag(e) {
 function onMove(e) {
     const items = [...list.querySelectorAll('.list-item:not(.dragging)')];
 
-    let closest = null;
-    let offset = Number.NEGATIVE_INFINITY;
-
-    items.forEach(item => {
-        const box = item.getBoundingClientRect();
-        const o = e.clientY - box.top - box.height / 2;
-        if (o < 0 && o > offset) {
-            offset = o;
-            closest = item;
+    for (let item of items) {
+        const rect = item.getBoundingClientRect();
+        if (e.clientY < rect.top + rect.height / 2) {
+            list.insertBefore(placeholder, item);
+            return;
         }
-    });
+    }
 
-    if (!closest) list.appendChild(draggedEl);
-    else list.insertBefore(draggedEl, closest);
+    list.appendChild(placeholder);
 }
 
-function endDrag(e) {
-    draggedEl.releasePointerCapture(e.pointerId);
-
-    draggedEl.classList.remove('dragging');
-    draggedEl = null;
+function endDrag() {
+    placeholder.replaceWith(dragged);
+    dragged.classList.remove('dragging');
+    dragged = null;
 
     document.removeEventListener('pointermove', onMove);
     document.removeEventListener('pointerup', endDrag);
@@ -271,14 +273,12 @@ function updateOrder() {
 }
 
 document.getElementById('copy-button').onclick = () => {
-    const text = currentEntries.map((e,i)=>`${e.value}, ${i+1}`).join('\n');
-    navigator.clipboard.writeText(text);
+    navigator.clipboard.writeText(currentEntries.map((e,i)=>`${e.value}, ${i+1}`).join('\n'));
 };
 
 document.getElementById('copy-selected').onclick = () => {
     const filtered = currentEntries.filter(e => selected.has(e.id));
-    const text = filtered.map((e,i)=>`${e.value}, ${i+1}`).join('\n');
-    navigator.clipboard.writeText(text);
+    navigator.clipboard.writeText(filtered.map((e,i)=>`${e.value}, ${i+1}`).join('\n'));
 };
 
 document.getElementById('reset-button').onclick = () => {
