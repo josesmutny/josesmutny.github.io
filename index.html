@@ -1,118 +1,108 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zpěvník</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            margin: 20px;
-            background-color: #f4f4f9;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zpěvník</title>
 
-        .controls {
-            margin-bottom: 20px;
-            display: flex;
-            gap: 10px;
-        }
+<style>
+body {
+    font-family: sans-serif;
+    margin: 10px;
+    background: #f4f4f9;
+}
 
-        button {
-            padding: 10px 15px;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            background-color: #007bff;
-            color: white;
-            transition: background-color 0.2s;
-        }
+.controls {
+    margin-bottom: 10px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
 
-        button:hover {
-            background-color: #0056b3;
-        }
+button {
+    padding: 6px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    background: #007bff;
+    color: white;
+}
 
-        #draggable-list {
-            list-style: none;
-            padding: 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: white;
-        }
+#draggable-list {
+    column-gap: 10px;
+}
 
-        .list-item {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            cursor: grab;
-            background-color: #ffffff;
-        }
+@media (min-width: 400px) { #draggable-list { columns: 1; } }
+@media (min-width: 700px) { #draggable-list { columns: 2; } }
+@media (min-width: 1000px){ #draggable-list { columns: 3; } }
+@media (min-width: 1300px){ #draggable-list { columns: 4; } }
 
-        .list-item.dragging {
-            opacity: 0.5;
-            background-color: #e0f7fa;
-        }
+.list-item {
+    break-inside: avoid;
+    background: white;
+    margin: 2px 0;
+    padding: 5px 6px;
+    font-size: 13px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: grab;
+    user-select: none;
+}
 
-        .drop-placeholder {
-            height: 50px;
-            background-color: #add8e6;
-            border: 2px dashed #007bff;
-            margin: 5px 0;
-            opacity: 0;
-        }
+.list-item.dragging {
+    opacity: 0.5;
+    background: #e0f7fa;
+}
 
-        .drop-placeholder.visible {
-            opacity: 1;
-        }
-    </style>
+/* ⭐ star checkbox */
+.star {
+    font-size: 14px;
+    cursor: pointer;
+    color: #ccc;
+    user-select: none;
+}
+
+.star.selected {
+    color: gold;
+}
+</style>
 </head>
+
 <body>
 
 <div class="controls">
-    <button id="copy-button">Copy Ordered List</button>
-    <button id="reset-button">Reset Order</button>
+    <button id="copy-button">Copy All</button>
+    <button id="copy-selected">Copy Selected</button>
+    <button id="reset-button">Reset</button>
 </div>
 
 <ul id="draggable-list"></ul>
 
 <script>
-const initialEntries = [
-{ id:1,value:"Lilie"},
-{ id:2,value:"Peterburg"},
-{ id:3,value:"Divocí koně"},
-{ id:4,value:"Vítr"},
-{ id:5,value:"Kozel"},
-{ id:6,value:"Hercegovina"},
-{ id:7,value:"Dokud se zpívá"},
-{ id:8,value:"Ještě jedno kafe"},
-{ id:9,value:"Pocity"},
-{ id:10,value:"Zuzana"},
-{ id:11,value:"Anděl"},
-{ id:12,value:"Po schodoch"},
-{ id:13,value:"Válka růží"},
-{ id:14,value:"Na kolena"},
-{ id:15,value:"Včelín"},
+const initialEntries = [ /* stejné jako předtím */ 
+{ id:1,value:"Lilie"},{ id:2,value:"Peterburg"},{ id:3,value:"Divocí koně"},
+{ id:4,value:"Vítr"},{ id:5,value:"Kozel"},{ id:6,value:"Hercegovina"},
+{ id:7,value:"Dokud se zpívá"},{ id:8,value:"Ještě jedno kafe"},
+{ id:9,value:"Pocity"},{ id:10,value:"Zuzana"},{ id:11,value:"Anděl"},
+{ id:12,value:"Po schodoch"},{ id:13,value:"Válka růží"},
+{ id:14,value:"Na kolena"},{ id:15,value:"Včelín"},
 { id:16,value:"Variace na renesanční téma"},
-{ id:17,value:"Mezi horami"},
-{ id:18,value:"Hrobař"},
-{ id:19,value:"Pažitka"},
-{ id:20,value:"Povídej"},
-{ id:21,value:"Batalion"},
-{ id:22,value:"Proklínám"},
+{ id:17,value:"Mezi horami"},{ id:18,value:"Hrobař"},
+{ id:19,value:"Pažitka"},{ id:20,value:"Povídej"},
+{ id:21,value:"Batalion"},{ id:22,value:"Proklínám"},
 { id:23,value:"Medvědi nevědí"},
 { id:24,value:"Dům u vycházejícího slunce"},
 { id:25,value:"Knockin' on Heaven's Door"},
-{ id:26,value:"Malování"},
-{ id:27,value:"Kutil"},
-{ id:28,value:"1982"},
-{ id:29,value:"To ta hel'pa"},
-{ id:30,value:"Cesta"},
-{ id:31,value:"Ráda se miluje"},
-{ id:32,value:"Hvězdář"},
-{ id:33,value:"1. signální"},
+{ id:26,value:"Malování"},{ id:27,value:"Kutil"},
+{ id:28,value:"1982"},{ id:29,value:"To ta hel'pa"},
+{ id:30,value:"Cesta"},{ id:31,value:"Ráda se miluje"},
+{ id:32,value:"Hvězdář"},{ id:33,value:"1. signální"},
 { id:34,value:"Slavíci z Madridu (Rossignol Anglais)"},
-{ id:35,value:"Rosa na kolejích"},
-{ id:36,value:"Eldorádo"},
-{ id:37,value:"Racci"},
-{ id:38,value:"Zejtra mám"},
+{ id:35,value:"Rosa na kolejích"},{ id:36,value:"Eldorádo"},
+{ id:37,value:"Racci"},{ id:38,value:"Zejtra mám"},
 { id:39,value:"Jdem zpátky do lesů"},
 { id:40,value:"Severní vítr"},
 { id:41,value:"Rána v trávě"},
@@ -184,50 +174,109 @@ const initialEntries = [
 ];
 
 let currentEntries = [...initialEntries];
+let selected = new Set();
 const list = document.getElementById('draggable-list');
-const copyButton = document.getElementById('copy-button');
-const resetButton = document.getElementById('reset-button');
-let draggedItem = null;
-let placeholder = null;
+
+let draggedEl = null;
 
 function renderList() {
     list.innerHTML = '';
     currentEntries.forEach(entry => {
-        const item = document.createElement('li');
-        item.className = 'list-item';
-        item.draggable = true;
-        item.dataset.id = entry.id;
-        item.textContent = entry.value;
+        const li = document.createElement('li');
+        li.className = 'list-item';
+        li.dataset.id = entry.id;
 
-        item.addEventListener('dragstart', e => {
-            draggedItem = item;
-            setTimeout(() => item.classList.add('dragging'), 0);
-        });
+        const star = document.createElement('span');
+        star.className = 'star';
+        star.textContent = '★';
 
-        item.addEventListener('dragend', () => {
-            item.classList.remove('dragging');
-            draggedItem = null;
-            updateListOrder();
-        });
+        if (selected.has(entry.id)) {
+            star.classList.add('selected');
+        }
 
-        list.appendChild(item);
+        star.onclick = (e) => {
+            e.stopPropagation();
+            if (selected.has(entry.id)) {
+                selected.delete(entry.id);
+                star.classList.remove('selected');
+            } else {
+                selected.add(entry.id);
+                star.classList.add('selected');
+            }
+        };
+
+        const text = document.createElement('span');
+        text.textContent = entry.value;
+
+        li.appendChild(star);
+        li.appendChild(text);
+
+        li.addEventListener('pointerdown', startDrag);
+
+        list.appendChild(li);
     });
 }
 
-function updateListOrder() {
-    const items = Array.from(list.querySelectorAll('.list-item'));
-    currentEntries = items.map(item =>
-        initialEntries.find(e => e.id == item.dataset.id)
+function startDrag(e) {
+    if (e.target.classList.contains('star')) return;
+
+    draggedEl = e.currentTarget;
+    draggedEl.classList.add('dragging');
+
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup', endDrag);
+}
+
+function onMove(e) {
+    const items = [...list.querySelectorAll('.list-item:not(.dragging)')];
+
+    let closest = null;
+    let offset = Number.NEGATIVE_INFINITY;
+
+    items.forEach(item => {
+        const box = item.getBoundingClientRect();
+        const o = e.clientY - box.top - box.height / 2;
+        if (o < 0 && o > offset) {
+            offset = o;
+            closest = item;
+        }
+    });
+
+    if (!closest) list.appendChild(draggedEl);
+    else list.insertBefore(draggedEl, closest);
+}
+
+function endDrag() {
+    draggedEl.classList.remove('dragging');
+    draggedEl = null;
+
+    document.removeEventListener('pointermove', onMove);
+    document.removeEventListener('pointerup', endDrag);
+
+    updateOrder();
+}
+
+function updateOrder() {
+    const items = [...list.children];
+    currentEntries = items.map(el =>
+        initialEntries.find(e => e.id == el.dataset.id)
     );
 }
 
-copyButton.onclick = () => {
+document.getElementById('copy-button').onclick = () => {
     const text = currentEntries.map((e,i)=>`${e.value}, ${i+1}`).join('\n');
     navigator.clipboard.writeText(text);
 };
 
-resetButton.onclick = () => {
+document.getElementById('copy-selected').onclick = () => {
+    const filtered = currentEntries.filter(e => selected.has(e.id));
+    const text = filtered.map((e,i)=>`${e.value}, ${i+1}`).join('\n');
+    navigator.clipboard.writeText(text);
+};
+
+document.getElementById('reset-button').onclick = () => {
     currentEntries = [...initialEntries];
+    selected.clear();
     renderList();
 };
 
