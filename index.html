@@ -22,11 +22,11 @@ body {
 button {
     padding: 6px 10px;
     font-size: 12px;
-    cursor: pointer;
     border: none;
     border-radius: 4px;
     background: #007bff;
     color: white;
+    cursor: pointer;
 }
 
 #draggable-list {
@@ -42,14 +42,17 @@ button {
     break-inside: avoid;
     background: white;
     margin: 2px 0;
-    padding: 5px 6px;
+    padding: 5px 8px;
     font-size: 13px;
     border-radius: 4px;
+
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 6px;
+
     cursor: grab;
     user-select: none;
+    touch-action: none; /* 🔥 klíčové pro mobile */
 }
 
 .list-item.dragging {
@@ -57,12 +60,16 @@ button {
     background: #e0f7fa;
 }
 
-/* ⭐ star checkbox */
+.text {
+    pointer-events: none;
+}
+
+/* ⭐ */
 .star {
-    font-size: 14px;
-    cursor: pointer;
     color: #ccc;
-    user-select: none;
+    cursor: pointer;
+    font-size: 14px;
+    flex-shrink: 0;
 }
 
 .star.selected {
@@ -82,7 +89,7 @@ button {
 <ul id="draggable-list"></ul>
 
 <script>
-const initialEntries = [ /* stejné jako předtím */ 
+const initialEntries = [
 { id:1,value:"Lilie"},{ id:2,value:"Peterburg"},{ id:3,value:"Divocí koně"},
 { id:4,value:"Vítr"},{ id:5,value:"Kozel"},{ id:6,value:"Hercegovina"},
 { id:7,value:"Dokud se zpívá"},{ id:8,value:"Ještě jedno kafe"},
@@ -186,30 +193,24 @@ function renderList() {
         li.className = 'list-item';
         li.dataset.id = entry.id;
 
+        const text = document.createElement('span');
+        text.className = 'text';
+        text.textContent = entry.value;
+
         const star = document.createElement('span');
         star.className = 'star';
         star.textContent = '★';
 
-        if (selected.has(entry.id)) {
-            star.classList.add('selected');
-        }
+        if (selected.has(entry.id)) star.classList.add('selected');
 
         star.onclick = (e) => {
             e.stopPropagation();
-            if (selected.has(entry.id)) {
-                selected.delete(entry.id);
-                star.classList.remove('selected');
-            } else {
-                selected.add(entry.id);
-                star.classList.add('selected');
-            }
+            selected.has(entry.id) ? selected.delete(entry.id) : selected.add(entry.id);
+            star.classList.toggle('selected');
         };
 
-        const text = document.createElement('span');
-        text.textContent = entry.value;
-
-        li.appendChild(star);
         li.appendChild(text);
+        li.appendChild(star);
 
         li.addEventListener('pointerdown', startDrag);
 
@@ -220,8 +221,12 @@ function renderList() {
 function startDrag(e) {
     if (e.target.classList.contains('star')) return;
 
+    e.preventDefault(); // 🔥 zabraňuje výběru textu
+
     draggedEl = e.currentTarget;
     draggedEl.classList.add('dragging');
+
+    draggedEl.setPointerCapture(e.pointerId);
 
     document.addEventListener('pointermove', onMove);
     document.addEventListener('pointerup', endDrag);
@@ -246,7 +251,9 @@ function onMove(e) {
     else list.insertBefore(draggedEl, closest);
 }
 
-function endDrag() {
+function endDrag(e) {
+    draggedEl.releasePointerCapture(e.pointerId);
+
     draggedEl.classList.remove('dragging');
     draggedEl = null;
 
