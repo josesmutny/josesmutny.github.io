@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="cs">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Draggable List</title>
+    <title>Zpěvník</title>
     <style>
         body {
             font-family: sans-serif;
@@ -44,244 +44,195 @@
             border-bottom: 1px solid #eee;
             cursor: grab;
             background-color: #ffffff;
-            transition: transform 0.3s, opacity 0.3s, background-color 0.2s;
-            position: relative;
-        }
-
-        .list-item:last-child {
-            border-bottom: none;
-        }
-
-        .list-item:active {
-            cursor: grabbing;
         }
 
         .list-item.dragging {
             opacity: 0.5;
-            background-color: #e0f7fa; /* Slightly highlight the dragging item */
+            background-color: #e0f7fa;
         }
 
         .drop-placeholder {
-            height: 50px; /* Same height as list-item */
-            background-color: #add8e6; /* Light blue */
+            height: 50px;
+            background-color: #add8e6;
             border: 2px dashed #007bff;
             margin: 5px 0;
             opacity: 0;
-            transition: opacity 0.2s, height 0.3s;
         }
 
         .drop-placeholder.visible {
             opacity: 1;
-            /* Height is already set, transition works when added/removed */
         }
     </style>
 </head>
 <body>
 
-    <div class="controls">
-        <button id="copy-button">Copy Ordered List</button>
-        <button id="reset-button">Reset Order</button>
-    </div>
+<div class="controls">
+    <button id="copy-button">Copy Ordered List</button>
+    <button id="reset-button">Reset Order</button>
+</div>
 
-    <ul id="draggable-list">
-        </ul>
+<ul id="draggable-list"></ul>
 
-    <script>
-        const initialEntries = 
-          [
-    { "id": 1, "value": "Cerny pasazer" },
-    { "id": 2, "value": "Mela jsem ja pejska" },
-    { "id": 3, "value": "Lasko (kryl)" },
-    { "id": 4, "value": "Ved me dal..." },
-    { "id": 5, "value": "Podvod" },
-    { "id": 6, "value": "Prazskej demon" },
-    { "id": 7, "value": "Zkouška dospělosti" },
-    { "id": 8, "value": "Tri cunatka" },
-    { "id": 9, "value": "Jacek" },
-    { "id": 10, "value": "Zahrada ticha" },
-    { "id": 11, "value": "Medvědi nevědí" },
-    { "id": 12, "value": "Buraky" },
-    { "id": 13, "value": "Panenka (poutníci)" },
-    { "id": 14, "value": "Citronky" },
-    { "id": 15, "value": "Pověste ho vejš" },
-    { "id": 16, "value": "Ja, pisnicka" },
-    { "id": 17, "value": "Povidej" },
-    { "id": 18, "value": "Tu kytaru jsem koupil kvuli tobe" },
-    { "id": 19, "value": "Růže z Texasu" },
-    { "id": 20, "value": "Dezolat" },
-    { "id": 21, "value": "Válečná" },
-    { "id": 22, "value": "Vecernicek" },
-    { "id": 23, "value": "Hudsonské šífy" },
-    { "id": 24, "value": "Stanky" },
-    { "id": 25, "value": "Píseň zhrzeného trampa" },
-    { "id": 26, "value": "Srouby a matice" },
-    { "id": 27, "value": "Z Petěrburg" },
-    { "id": 28, "value": "Zabili, zabili" },
-    { "id": 29, "value": "Hlupaku najdu te" },
-    { "id": 30, "value": "Aux champs elysées" },
-    { "id": 31, "value": "Cesta?" },
-    { "id": 32, "value": "Hruška" },
-    { "id": 33, "value": "Vysoký jalovec" },
-    { "id": 34, "value": "Sova sněžná" },
-    { "id": 35, "value": "to ta helpa" },
-    { "id": 36, "value": "veličenstvo kat" },
-    { "id": 37, "value": "lojza a líza" },
-    { "id": 38, "value": "Bratříčku zavírej vrátka?" },
-    { "id": 39, "value": "Riptide" },
-    { "id": 40, "value": "Where is my mind" }
-    ];
+<script>
+const initialEntries = [
+{ id:1,value:"Lilie"},
+{ id:2,value:"Peterburg"},
+{ id:3,value:"Divocí koně"},
+{ id:4,value:"Vítr"},
+{ id:5,value:"Kozel"},
+{ id:6,value:"Hercegovina"},
+{ id:7,value:"Dokud se zpívá"},
+{ id:8,value:"Ještě jedno kafe"},
+{ id:9,value:"Pocity"},
+{ id:10,value:"Zuzana"},
+{ id:11,value:"Anděl"},
+{ id:12,value:"Po schodoch"},
+{ id:13,value:"Válka růží"},
+{ id:14,value:"Na kolena"},
+{ id:15,value:"Včelín"},
+{ id:16,value:"Variace na renesanční téma"},
+{ id:17,value:"Mezi horami"},
+{ id:18,value:"Hrobař"},
+{ id:19,value:"Pažitka"},
+{ id:20,value:"Povídej"},
+{ id:21,value:"Batalion"},
+{ id:22,value:"Proklínám"},
+{ id:23,value:"Medvědi nevědí"},
+{ id:24,value:"Dům u vycházejícího slunce"},
+{ id:25,value:"Knockin' on Heaven's Door"},
+{ id:26,value:"Malování"},
+{ id:27,value:"Kutil"},
+{ id:28,value:"1982"},
+{ id:29,value:"To ta hel'pa"},
+{ id:30,value:"Cesta"},
+{ id:31,value:"Ráda se miluje"},
+{ id:32,value:"Hvězdář"},
+{ id:33,value:"1. signální"},
+{ id:34,value:"Slavíci z Madridu (Rossignol Anglais)"},
+{ id:35,value:"Rosa na kolejích"},
+{ id:36,value:"Eldorádo"},
+{ id:37,value:"Racci"},
+{ id:38,value:"Zejtra mám"},
+{ id:39,value:"Jdem zpátky do lesů"},
+{ id:40,value:"Severní vítr"},
+{ id:41,value:"Rána v trávě"},
+{ id:42,value:"Vysoký jalovec"},
+{ id:43,value:"Ahasver"},
+{ id:44,value:"Měla jsem já pejska"},
+{ id:45,value:"Tři citronky"},
+{ id:46,value:"Šárka"},
+{ id:47,value:"Zatímco se koupeš"},
+{ id:48,value:"Velrybářská výprava"},
+{ id:49,value:"Montgomery"},
+{ id:50,value:"Hejkal"},
+{ id:51,value:"Amazonka"},
+{ id:52,value:"Lokomotiva"},
+{ id:53,value:"Dej mi víc své lásky"},
+{ id:54,value:"Jožin z bažin"},
+{ id:55,value:"Tři kříže"},
+{ id:56,value:"Jacek"},
+{ id:57,value:"Traktor"},
+{ id:58,value:"Vodácká holka"},
+{ id:59,value:"Když mě brali za vojáka"},
+{ id:60,value:"Těšínská"},
+{ id:61,value:"Známka punku"},
+{ id:62,value:"Vlaštovky"},
+{ id:63,value:"Pověste ho vejš"},
+{ id:64,value:"Hlupáku najdu tě"},
+{ id:65,value:"Lou z Lille"},
+{ id:66,value:"Lovci lebek"},
+{ id:67,value:"Válečná"},
+{ id:68,value:"Morituri te salutant"},
+{ id:69,value:"Proměny"},
+{ id:70,value:"Let It Be"},
+{ id:71,value:"Vítr to ví (Blowin' in the Wind)"},
+{ id:72,value:"Na širém moři"},
+{ id:73,value:"Podvod"},
+{ id:74,value:"Indiáni ve městě"},
+{ id:75,value:"Zkouška dospělosti"},
+{ id:76,value:"Stýskání"},
+{ id:77,value:"Mám jizvu na rtu"},
+{ id:78,value:"Řekni kde ty kytky jsou"},
+{ id:79,value:"Hudsonské šífy"},
+{ id:80,value:"Růže z Texasu"},
+{ id:81,value:"Už to nenapravím"},
+{ id:82,value:"Darmoděj"},
+{ id:83,value:"Kometa"},
+{ id:84,value:"Blátivá cesta"},
+{ id:85,value:"Lilie (skautská)"},
+{ id:86,value:"Omnia vincit amor"},
+{ id:87,value:"Zítra ráno v pět"},
+{ id:88,value:"Lásko"},
+{ id:89,value:"Bedna od whisky"},
+{ id:90,value:"Jdou po mně jdou"},
+{ id:91,value:"O malém rytíři"},
+{ id:92,value:"Černej pasažér"},
+{ id:93,value:"Magdaléna"},
+{ id:94,value:"Dva"},
+{ id:95,value:"Tři čuníci"},
+{ id:96,value:"Pražskej démon"},
+{ id:97,value:"Osud"},
+{ id:98,value:"Česká státní hymna"},
+{ id:99,value:"Skautská večerka"},
+{ id:100,value:"Hvězdičky dobrou noc"},
+{ id:101,value:"Junácká hymna"},
+{ id:102,value:"Ukolébavka"},
+{ id:103,value:"Slunce za hory"},
+{ id:104,value:"Mravenčí ukolébavka"},
+{ id:105,value:"Bláznova ukolébavka"},
+{ id:106,value:"Ho Ho Watanay"}
+];
 
-        let currentEntries = [...initialEntries];
-        const list = document.getElementById('draggable-list');
-        const copyButton = document.getElementById('copy-button');
-        const resetButton = document.getElementById('reset-button');
-        let draggedItem = null;
-        let placeholder = null;
+let currentEntries = [...initialEntries];
+const list = document.getElementById('draggable-list');
+const copyButton = document.getElementById('copy-button');
+const resetButton = document.getElementById('reset-button');
+let draggedItem = null;
+let placeholder = null;
 
-        function renderList() {
-            list.innerHTML = '';
-            currentEntries.forEach(entry => {
-                const item = document.createElement('li');
-                item.className = 'list-item';
-                item.draggable = true;
-                item.dataset.id = entry.id;
-                item.textContent = entry.value;
+function renderList() {
+    list.innerHTML = '';
+    currentEntries.forEach(entry => {
+        const item = document.createElement('li');
+        item.className = 'list-item';
+        item.draggable = true;
+        item.dataset.id = entry.id;
+        item.textContent = entry.value;
 
-                item.addEventListener('dragstart', handleDragStart);
-                item.addEventListener('dragend', handleDragEnd);
-                list.appendChild(item);
-            });
-        }
+        item.addEventListener('dragstart', e => {
+            draggedItem = item;
+            setTimeout(() => item.classList.add('dragging'), 0);
+        });
 
-        function createPlaceholder() {
-            if (!placeholder) {
-                placeholder = document.createElement('div');
-                placeholder.className = 'drop-placeholder';
-            }
-            return placeholder;
-        }
-
-        function handleDragStart(e) {
-            draggedItem = this;
-            setTimeout(() => {
-                this.classList.add('dragging');
-            }, 0); // Delay to allow the item to be "picked up" before changing its style
-            e.dataTransfer.effectAllowed = 'move';
-        }
-
-        function handleDragEnd(e) {
-            this.classList.remove('dragging');
+        item.addEventListener('dragend', () => {
+            item.classList.remove('dragging');
             draggedItem = null;
-            if (placeholder && placeholder.parentElement) {
-                placeholder.remove();
-            }
             updateListOrder();
-        }
-
-        function updateListOrder() {
-            const items = Array.from(list.querySelectorAll('.list-item'));
-            currentEntries = items.map(item => {
-                const id = parseInt(item.dataset.id);
-                return initialEntries.find(entry => entry.id === id);
-            }).filter(entry => entry !== undefined); // Rebuild currentEntries based on DOM order
-            console.log('New Order:', currentEntries.map(e => e.value));
-        }
-
-        list.addEventListener('dragover', (e) => {
-            e.preventDefault(); // Necessary to allow dropping
-            if (!draggedItem) return;
-
-            const afterElement = getDragAfterElement(list, e.clientY);
-            const currentPlaceholder = createPlaceholder();
-
-            // Insert placeholder
-            if (afterElement == null) {
-                // If dragging to the end
-                if (list.lastChild !== currentPlaceholder) {
-                    list.appendChild(currentPlaceholder);
-                }
-            } else {
-                // If dragging before another element
-                if (afterElement.previousSibling !== currentPlaceholder) {
-                    list.insertBefore(currentPlaceholder, afterElement);
-                }
-            }
-
-            // Ensure placeholder is visible
-            currentPlaceholder.classList.add('visible');
-            e.dataTransfer.dropEffect = 'move';
         });
 
-        list.addEventListener('dragleave', (e) => {
-            // Optional: remove placeholder if drag leaves the whole list area
-            // However, keeping it visible until drop or dragend offers better visual guidance
-        });
+        list.appendChild(item);
+    });
+}
 
-        list.addEventListener('drop', (e) => {
-            e.preventDefault();
-            if (!draggedItem) return;
+function updateListOrder() {
+    const items = Array.from(list.querySelectorAll('.list-item'));
+    currentEntries = items.map(item =>
+        initialEntries.find(e => e.id == item.dataset.id)
+    );
+}
 
-            // Remove placeholder visibility
-            if (placeholder) {
-                placeholder.classList.remove('visible');
-            }
+copyButton.onclick = () => {
+    const text = currentEntries.map((e,i)=>`${e.value}, ${i+1}`).join('\n');
+    navigator.clipboard.writeText(text);
+};
 
-            // Determine where to drop the dragged item
-            const afterElement = getDragAfterElement(list, e.clientY);
+resetButton.onclick = () => {
+    currentEntries = [...initialEntries];
+    renderList();
+};
 
-            if (afterElement == null) {
-                list.appendChild(draggedItem);
-            } else {
-                list.insertBefore(draggedItem, afterElement);
-            }
-
-            // Remove the placeholder from the DOM after dropping the item
-            if (placeholder && placeholder.parentElement) {
-                placeholder.remove();
-            }
-
-            // The dragend listener will call updateListOrder
-        });
-
-        function getDragAfterElement(container, y) {
-            const draggableItems = Array.from(container.querySelectorAll('.list-item:not(.dragging)'));
-            
-            // Include placeholder in the calculation if it's visible, to get the correct drop position
-            const items = draggableItems.filter(item => item !== draggedItem);
-
-            return items.reduce((closest, child) => {
-                const box = child.getBoundingClientRect();
-                const offset = y - box.top - box.height / 2;
-                if (offset < 0 && offset > closest.offset) {
-                    return { offset: offset, element: child };
-                } else {
-                    return closest;
-                }
-            }, { offset: Number.NEGATIVE_INFINITY }).element;
-        }
-
-        // --- Button Functions ---
-
-        copyButton.addEventListener('click', () => {
-            const result = currentEntries.map((entry, index) => {
-                return `${entry.value}, ${index + 1}`; // Index is 1-based position
-            }).join('\n');
-
-            navigator.clipboard.writeText(result)
-                .catch(err => {
-                    console.error('Could not copy text: ', err);
-                    alert('Failed to copy to clipboard. Check console for details.');
-                });
-        });
-
-        resetButton.addEventListener('click', () => {
-            currentEntries = [...initialEntries];
-            renderList();
-        });
-
-        // Initial render
-        renderList();
-    </script>
+renderList();
+</script>
 
 </body>
 </html>
